@@ -25,6 +25,7 @@ struct Node {
 
 Node *expr(void);
 Node *mul(void);
+Node *unary(void);
 Node *primary(void);
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
@@ -122,16 +123,27 @@ Node *expr(){
 
 // mul = primary ('*' primary | "/" primary)
 Node *mul(){
-    Node *node = primary();
+    Node *node = unary();
     while(1){
         if (consume('*')){
-            node = new_node(ND_MUL, node, primary());
+            node = new_node(ND_MUL, node, unary());
         }else if (consume('/')){
-            node = new_node(ND_DIV, node, primary());
+            node = new_node(ND_DIV, node, unary());
         }else{
             return node;
         }
     }
+}
+
+// unary = ("+" | "-")? primary
+Node *unary(){
+    if (consume('+')){
+        return primary();
+    }
+    if (consume('-')){
+        return new_node(ND_SUB, new_node_num(0), primary());
+    }
+    return primary();
 }
 
 // primary = num | "(" expr ")"
