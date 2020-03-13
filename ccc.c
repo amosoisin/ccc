@@ -16,16 +16,24 @@ typedef struct Token Token;
 struct Token{
     TokenKind kind; // token type
     Token *next;    // next token
-    uint32_t val;   // integer if kind is number
+    int32_t val;   // integer if kind is number
     char *str;      // string if kind is operator
 };
 
 Token *token;   // current token
 
 // report error
-void error(char *fmt, ...){
+char *user_input;
+void error_at(char *loc, char *fmt, ...){
     va_list ap;
     va_start(ap, fmt);
+
+    fprintf(stderr, "%d\n", loc);
+    fprintf(stderr, "%d\n", user_input);
+    int32_t pos = loc - user_input;
+    fprintf(stderr, "%s\n", user_input);
+    fprintf(stderr, "%*s", pos, "");
+    fprintf(stderr, "^ ");
     vfprintf(stderr, fmt, ap);
     fprintf(stderr, "\n");
     exit(1);
@@ -45,7 +53,7 @@ bool consume(char op){
 // else report error
 void expect(char op){
     if (token->kind != TK_RESERVED || token->str[0] != op){
-        error("is not '%c'", op);
+        error_at(token->str, "is not '%c'", op);
     }
     token = token->next;
 }
@@ -53,9 +61,11 @@ void expect(char op){
 // if token is expected number
 // move next token and return number
 // else report error
-uint32_t expect_number(){
-    if (token->kind != TK_NUM) error("is not number");
-    uint32_t val = token->val;
+int32_t expect_number(){
+    if (token->kind != TK_NUM) {
+        error_at(token->str, "is not number");
+    }
+    int32_t val = token->val;
     token = token->next;
     return val;
 }
@@ -99,20 +109,21 @@ Token *tokenize(char *p){
             continue;
         }
 
-        error("cannot tokenize");
+        error_at(p, "cannot tokenize");
     }
     new_token(TK_EOF, cur, p);
     return head.next;
 }
 
 
-int main(uint32_t argc, uint8_t **argv){
+int main(int32_t argc, int8_t **argv){
     if (argc != 2){
         fprintf(stderr, "Invalid argument!!");
         return 1;
     }
 
-    token = tokenize(argv[1]);
+    user_input = argv[1];
+    token = tokenize(user_input);
 
     printf(".intel_syntax noprefix\n");
     printf(".global main\n");
