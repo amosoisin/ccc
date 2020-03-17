@@ -19,7 +19,7 @@ struct Node {
     NodeKind kind;  // node type
     Node *lhs;      // Left Node
     Node *rhs;      // Right Node
-    int val;        // use if kind is ND_NUM
+    uint32_t val;        // use if kind is ND_NUM
 };
 
 
@@ -36,7 +36,7 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
     return node;
 }
 
-Node *new_node_num(int32_t val){
+Node *new_node_num(uint32_t val){
     Node *node = calloc(1, sizeof(Node));
     node->kind = ND_NUM;
     node->val = val;
@@ -53,7 +53,7 @@ typedef struct Token Token;
 struct Token{
     TokenKind kind; // token type
     Token *next;    // next token
-    int32_t val;   // integer if kind is number
+    uint32_t val;   // integer if kind is number
     char *str;      // string if kind is operator
 };
 
@@ -65,7 +65,7 @@ void error_at(char *loc, char *fmt, ...){
     va_list ap;
     va_start(ap, fmt);
 
-    int32_t pos = loc - user_input;
+    uint32_t pos = loc - user_input;
     fprintf(stderr, "%s\n", user_input);
     fprintf(stderr, "%*s", pos, "");
     fprintf(stderr, "^ ");
@@ -96,11 +96,11 @@ void expect(char op){
 // if token is expected number
 // move next token and return number
 // else report error
-int32_t expect_number(){
+uint32_t expect_number(){
     if (token->kind != TK_NUM) {
         error_at(token->str, "is not number");
     }
-    int32_t val = token->val;
+    uint32_t val = token->val;
     token = token->next;
     return val;
 }
@@ -228,7 +228,7 @@ void gen(Node *node){
     printf("    push rax\n");
 }
 
-int main(int32_t argc, int8_t **argv){
+int main(uint32_t argc, int8_t **argv){
     if (argc != 2){
         fprintf(stderr, "Invalid argument!!");
         return 1;
